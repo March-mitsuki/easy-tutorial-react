@@ -1,0 +1,60 @@
+{
+  "name": "easy-tutorial-react",
+  "version": "0.3.3",
+  "description": "A React framework that helps you easily create step-by-step tutorials.",
+  "keywords": [
+    "react",
+    "tutorial",
+    "guide",
+    "step-by-step",
+    "intro",
+    "typescript"
+  ],
+  "author": "March-Mitsuki",
+  "license": "MIT",
+  "dependencies": {
+    "@emotion/react": "^11.11.3",
+    "mitt": "^3.0.1"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.55",
+    "@types/react-dom": "^18.2.19",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "rimraf": "^5.0.5",
+    "tsup": "^8.0.2",
+    "typescript": "^5.2.2"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "./dist",
+    "./package.json"
+  ],
+  "exports": {
+    ".": {
+      "source": "./src/index.tsx",
+      "require": {
+        "default": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      },
+      "import": {
+        "default": "./dist/index.mjs",
+        "types": "./dist/index.d.mts"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsup"
+  }
+}
