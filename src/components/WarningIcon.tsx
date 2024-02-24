@@ -1,9 +1,20 @@
-export default function WarningIcon() {
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
+import { boxSizes } from "./theme";
+
+export type WarningIconProps = {
+  boxSize: keyof typeof boxSizes;
+};
+export default function WarningIcon({ boxSize }: WarningIconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
       viewBox="0 0 24 24"
+      css={css({
+        width: boxSizes[boxSize],
+        height: boxSizes[boxSize],
+      })}
     >
       <g fill="none">
         <path

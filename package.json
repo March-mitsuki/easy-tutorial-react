@@ -1,7 +1,7 @@
 {
   "name": "easy-tutorial-react",
   "version": "0.3.3",
-  "description": "A React framework that helps you easily create step-by-step tutorials.",
+  "description": "Write onboarding tutorial with a declarative API",
   "keywords": [
     "react",
     "tutorial",
@@ -14,6 +14,7 @@
   "license": "MIT",
   "dependencies": {
     "@emotion/react": "^11.11.3",
+    "@emotion/serialize": "^1.1.3",
     "mitt": "^3.0.1"
   },
   "peerDependencies": {
@@ -25,6 +26,7 @@
     "@types/react-dom": "^18.2.19",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "@vitejs/plugin-react": "^4.2.1",
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
@@ -32,7 +34,8 @@
     "react-dom": "^18.2.0",
     "rimraf": "^5.0.5",
     "tsup": "^8.0.2",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "vite": "^5.1.4"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -55,6 +58,7 @@
     }
   },
   "scripts": {
+    "dev": "vite",
     "build": "tsup"
   }
 }

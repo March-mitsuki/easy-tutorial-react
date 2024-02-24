@@ -1,12 +1,27 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { EasyTutorial } from ".";
+import { EasyTutorial } from "./tutorial";
 import { buildPortalElem, findElemByEasyTutorialQuery } from "./utils";
 
-export const EasyTutorialRenderer: React.FC<{
+export type Renderer = React.FC<{
   dataSource: EasyTutorial;
-  extendRenderArgs?: any;
-}> = ({ dataSource, extendRenderArgs }) => {
+  extendRenderArgs?: any[];
+}>;
+
+export const EasyTutorialRenderer: Renderer = ({
+  dataSource,
+  extendRenderArgs,
+}) => {
+  if (typeof extendRenderArgs === "undefined") {
+    extendRenderArgs = [];
+  } else if (!Array.isArray(extendRenderArgs)) {
+    console.error(
+      "[EasyTutorial] extendRenderArgs must be an array, but got",
+      extendRenderArgs
+    );
+    extendRenderArgs = [];
+  }
+
   const [, _setRefresh] = useState(0);
   const callRefresh = () => _setRefresh(Date.now());
 
@@ -45,6 +60,11 @@ export const EasyTutorialRenderer: React.FC<{
     console.error("[EasyTutorial] currentPlacement is undefined");
     return null;
   }
+  const currentContent = ct.currentContent();
+  if (!currentContent) {
+    console.error("[EasyTutorial] currentContent is undefined");
+    return null;
+  }
 
   const cr = dataSource.currentRender();
   if (!cr) {
@@ -79,6 +99,7 @@ export const EasyTutorialRenderer: React.FC<{
             totalStep: ct.totalStepLegth(),
             currentStep: ct.currentStepIdx(),
             placement,
+            currentContent,
           },
           ...extendRenderArgs
         ),

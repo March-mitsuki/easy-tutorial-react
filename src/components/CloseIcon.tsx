@@ -1,12 +1,23 @@
-export default function CloseIcon() {
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
+import { boxSizes } from "./theme";
+
+export type CloseIconProps = {
+  boxSize: keyof typeof boxSizes;
+};
+export default function CloseIcon({ boxSize }: CloseIconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
-      viewBox="0 0 512 512"
+      viewBox="0 0 24 24"
+      css={css({
+        width: boxSizes[boxSize],
+        height: boxSizes[boxSize],
+      })}
     >
       <path
-        d="M289.94 256l95-95A24 24 0 0 0 351 127l-95 95l-95-95a24 24 0 0 0-34 34l95 95l-95 95a24 24 0 1 0 34 34l95-95l95 95a24 24 0 0 0 34-34z"
+        d="M18.3 5.71a.996.996 0 0 0-1.41 0L12 10.59L7.11 5.7A.996.996 0 1 0 5.7 7.11L10.59 12L5.7 16.89a.996.996 0 1 0 1.41 1.41L12 13.41l4.89 4.89a.996.996 0 1 0 1.41-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"
         fill="currentColor"
       ></path>
     </svg>

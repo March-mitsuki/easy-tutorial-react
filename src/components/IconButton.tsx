@@ -1,30 +1,29 @@
 /** @jsxImportSource @emotion/react */
+
 import { css } from "@emotion/react";
 import { CSSInterpolation } from "@emotion/serialize";
-import { borderRadius, colors, fontSizes, spacing } from "./theme";
-import React from "react";
+import { borderRadius, colors } from "./theme";
 
-export type ButtonProps = {
+export type IconButtonProps = {
   onClick: React.MouseEventHandler<HTMLButtonElement>;
+  icon: React.ReactNode;
   maybeDarkMode: boolean;
   extCSS?: CSSInterpolation;
 };
-export default function Button({
+export default function IconButton({
+  icon,
   onClick,
   extCSS,
   maybeDarkMode,
-  children,
-}: React.PropsWithChildren<ButtonProps>) {
+}: IconButtonProps) {
   let componentCSS: CSSInterpolation = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     borderRadius: borderRadius.md,
-    fontWeight: 700,
-    fontSize: fontSizes.md,
     borderWidth: 0,
     cursor: "pointer",
-    padding: `${spacing[2]} ${spacing[4]}`,
+    padding: 0,
     appearance: "none",
     paddingInline: "none",
     paddingBlock: "none",
@@ -37,13 +36,6 @@ export default function Button({
       color: colors.white,
       ":hover": {
         backgroundColor: colors.blackAlpha600,
-        borderColor: "none",
-      },
-      ":focus": {
-        outline: "none",
-      },
-      ":focus-visible": {
-        outline: "none",
       },
     };
   } else {
@@ -53,13 +45,6 @@ export default function Button({
       color: colors.blackAlpha700,
       ":hover": {
         backgroundColor: colors.whiteAlpha900,
-        borderColor: "none",
-      },
-      ":focus": {
-        outline: "none",
-      },
-      ":focus-visible": {
-        outline: "none",
       },
     };
   }
@@ -67,7 +52,7 @@ export default function Button({
 
   return (
     <button onClick={onClick} type="button" css={elemCSS}>
-      {children}
+      {icon}
     </button>
   );
 }

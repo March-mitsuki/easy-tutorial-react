@@ -1,7 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unused-vars  */
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 import mitt from "mitt";
 import type { Emitter } from "mitt";
 import { findElemByEasyTutorialQuery, getElemAbsPos } from "./utils";
+import Stack from "./components/Stack";
+import { borderRadius, colors, spacing } from "./components/theme";
+import Spacer from "./components/Spacer";
+import HStack from "./components/HStack";
+import Text from "./components/Text";
+import Button from "./components/Button";
 
 export class EasyTutorial<
   K extends string = string,
@@ -15,6 +22,11 @@ export class EasyTutorial<
   emit = this._emitter.emit;
 
   addTutorial(name: K) {
+    if (this._tutorials[name]) {
+      console.error(
+        `[EasyTutorial] Tutorial ${name} already exists, will override`
+      );
+    }
     const t = new TutorialData<A>(this._emitter, this.stop.bind(this));
     this._tutorials[name] = t;
     return t;
@@ -69,11 +81,242 @@ export class EasyTutorial<
     return !!this._currentTutorial;
   }
 }
+
 class TutorialData<A extends Array<any>> {
   private _steps: TutorialStep<A>[] = [];
   private _stopFunc: () => void;
   private _currentStepIdx = 0;
   private _emitter: TutorialEmitter;
+  private _defaultRender: RenderFunc<A> = (basicArg, ...args) => {
+    const {
+      targetElem,
+      stepType,
+      next,
+      prev,
+      stop,
+      placement,
+      totalStep,
+      currentStep,
+      currentContent,
+    } = basicArg;
+
+    if (!(targetElem instanceof HTMLElement)) {
+      console.error(
+        "[EasyTutorial] targetElem is not HTMLElement, default render only support HTMLElement"
+      );
+      return (
+        <Stack
+          extCSS={{
+            position: "absolute",
+            minWidth: "256px",
+            minHeight: "128px",
+            padding: spacing[4],
+            borderRadius: borderRadius.md,
+            backgroundColor: colors.gray600,
+          }}
+        >
+          EasyTutorial default render only support HTMLElement, You should
+          provide a custom render function.
+        </Stack>
+      );
+    }
+
+    const maybeDarkMode = (): boolean => {
+      if (typeof args === "undefined") {
+        return false;
+      }
+      const maybeColorMode = args[0];
+      if (typeof maybeColorMode === "string") {
+        return maybeColorMode === "dark";
+      }
+      return false;
+    };
+    const { top: targetTop, left: targetLeft } = getElemAbsPos(targetElem);
+    const targetHeight = targetElem.offsetHeight;
+    const targetWidth = targetElem.offsetWidth;
+
+    const firstBtns = (
+      <HStack>
+        <Text maybeDarkMode={maybeDarkMode()}>{`${
+          currentStep + 1
+        }/${totalStep}`}</Text>
+        <Spacer />
+        <Button onClick={next} maybeDarkMode={maybeDarkMode()}>
+          Next
+        </Button>
+        <Button onClick={stop} maybeDarkMode={maybeDarkMode()}>
+          Close
+        </Button>
+      </HStack>
+    );
+    const commonBtns = (
+      <HStack>
+        <Text maybeDarkMode={maybeDarkMode()}>{`${
+          currentStep + 1
+        }/${totalStep}`}</Text>
+        <Spacer />
+        <Button onClick={prev} maybeDarkMode={maybeDarkMode()}>
+          Back
+        </Button>
+        <Button onClick={next} maybeDarkMode={maybeDarkMode()}>
+          Next
+        </Button>
+        <Button onClick={stop} maybeDarkMode={maybeDarkMode()}>
+          Close
+        </Button>
+      </HStack>
+    );
+    const lastBtn = (
+      <HStack>
+        <Text maybeDarkMode={maybeDarkMode()}>{`${
+          currentStep + 1
+        }/${totalStep}`}</Text>
+        <Spacer />
+        <Button onClick={prev} maybeDarkMode={maybeDarkMode()}>
+          Back
+        </Button>
+        <Button onClick={stop} maybeDarkMode={maybeDarkMode()}>
+          Close
+        </Button>
+      </HStack>
+    );
+    const singleBtn = (
+      <HStack>
+        <Text maybeDarkMode={maybeDarkMode()}>{`${
+          currentStep + 1
+        }/${totalStep}`}</Text>
+        <Spacer />
+        <Button onClick={stop} maybeDarkMode={maybeDarkMode()}>
+          Close
+        </Button>
+      </HStack>
+    );
+    const btns = () => {
+      console.log("stepType", stepType);
+      switch (stepType) {
+        case "first":
+          return firstBtns;
+        case "last":
+          return lastBtn;
+        case "single":
+          return singleBtn;
+        default:
+          return commonBtns;
+      }
+    };
+
+    let focusEffectZIndex = Number(targetElem.style.zIndex) - 1;
+    if (isNaN(focusEffectZIndex)) focusEffectZIndex = 0;
+
+    const focusEffectPadding = 12;
+    const space = 8;
+    let top: number | undefined;
+    let left: number | undefined;
+    let transform: string | undefined;
+    switch (placement) {
+      case "top-left":
+        top = targetTop - focusEffectPadding - space;
+        left = targetLeft - focusEffectPadding;
+        transform = "translateY(-100%)";
+        break;
+      case "top-center":
+        top = targetTop - focusEffectPadding - space;
+        left = targetLeft + targetElem.offsetWidth / 2;
+        transform = "translate(-50%, -100%)";
+        break;
+      case "top-right":
+        top = targetTop - focusEffectPadding - space;
+        left = targetLeft + targetElem.offsetWidth + focusEffectPadding;
+        transform = "translate(-100%, -100%)";
+        break;
+      case "left-top":
+        top = targetTop - focusEffectPadding;
+        left = targetLeft - focusEffectPadding - space;
+        transform = "translateX(-100%)";
+        break;
+      case "left-center":
+        top = targetTop + targetHeight / 2;
+        left = targetLeft - focusEffectPadding - space;
+        transform = "translate(-100%, -50%)";
+        break;
+      case "left-bottom":
+        top = targetTop + targetHeight + focusEffectPadding;
+        left = targetLeft - focusEffectPadding - space;
+        transform = "translate(-100%, -100%)";
+        break;
+      case "right-top":
+        top = targetTop - focusEffectPadding;
+        left = targetLeft + targetWidth + focusEffectPadding + space;
+        transform = undefined;
+        break;
+      case "right-center":
+        top = targetTop + targetHeight / 2;
+        left = targetLeft + targetWidth + focusEffectPadding + space;
+        transform = "translateY(-50%)";
+        break;
+      case "right-bottom":
+        top = targetTop + targetHeight + focusEffectPadding;
+        left = targetLeft + targetWidth + focusEffectPadding + space;
+        transform = "translateY(-100%)";
+        break;
+      case "bottom-right":
+        top = targetTop + targetHeight + focusEffectPadding + space;
+        left = targetLeft + targetWidth + focusEffectPadding;
+        transform = "translateX(-100%)";
+        break;
+      case "bottom-center":
+        top = targetTop + targetHeight + focusEffectPadding + space;
+        left = targetLeft + targetWidth / 2;
+        transform = "translateX(-50%)";
+        break;
+      default:
+        // bottom-left
+        top = targetTop + targetHeight + focusEffectPadding + space;
+        left = targetLeft - focusEffectPadding;
+        transform = undefined;
+        break;
+    }
+
+    return (
+      <>
+        <Stack
+          extCSS={{
+            position: "absolute",
+            top: `${top}px`,
+            left: `${left}px`,
+            transform: transform,
+            minWidth: "256px",
+            minHeight: "128px",
+            padding: spacing[4],
+            borderRadius: borderRadius.md,
+            backgroundColor: maybeDarkMode() ? colors.gray600 : colors.gray300,
+            gap: 0,
+          }}
+        >
+          {currentContent}
+          <Spacer />
+          <div css={css({ marginTop: spacing[2] })}>{btns()}</div>
+        </Stack>
+
+        <div
+          css={css({
+            zIndex: focusEffectZIndex || "auto",
+            position: "absolute",
+            top: `${targetTop - focusEffectPadding}px`,
+            left: `${targetLeft - focusEffectPadding}px`,
+            width: `${targetWidth + focusEffectPadding * 2}px`,
+            height: `${targetHeight + focusEffectPadding * 2}px`,
+            border: `3px solid`,
+            borderRadius: borderRadius.md,
+            borderColor: maybeDarkMode()
+              ? colors.orangeDark
+              : colors.orangeLight,
+            pointerEvents: "none",
+          })}
+        />
+      </>
+    );
+  };
 
   constructor(emitter: TutorialEmitter, stopFunc: () => void) {
     this._emitter = emitter;
@@ -118,6 +361,18 @@ class TutorialData<A extends Array<any>> {
 
   currentTargetQuery() {
     return this.currentStepObj()?.targetQuery;
+  }
+
+  currentPlacement() {
+    return this.currentStepObj()?.placement;
+  }
+
+  currentContent() {
+    return this.currentStepObj()?.content;
+  }
+
+  overrideDefaultRender(render: RenderFunc<A>) {
+    this._defaultRender = render;
   }
 
   noticeMeta(type: CheckCanRenderType): EasyTutorialNoticeMeta {
@@ -194,7 +449,7 @@ class TutorialData<A extends Array<any>> {
       return false;
     }
     if (!step.canRender()) {
-      this._emitter.emit("canNotNext", this.noticeMeta(type));
+      this._emitter.emit("canNotRender", this.noticeMeta(type));
       return false;
     }
     return true;
@@ -239,10 +494,6 @@ class TutorialData<A extends Array<any>> {
     this._emitter.emit("prevStep");
   }
 
-  currentPlacement() {
-    return this.currentStepObj()?.placement;
-  }
-
   isLastStep() {
     return this._currentStepIdx >= this._steps.length - 1;
   }
@@ -264,7 +515,7 @@ class TutorialData<A extends Array<any>> {
 
   addStep({
     targetQuery,
-    // content,
+    content,
     render,
     scrollInView,
     noticeMsg,
@@ -275,188 +526,10 @@ class TutorialData<A extends Array<any>> {
     placement,
     canRender,
   }: AddStepParams<A>) {
-    const defaultRender: RenderFunc<A> = (basicArg, ...args) => {
-      const {
-        targetElem,
-        stepType,
-        // next,
-        // prev,
-        // stop,
-        placement,
-        // totalStep,
-        // currentStep,
-      } = basicArg;
-
-      if (!(targetElem instanceof HTMLElement)) {
-        console.error(
-          "[EasyTutorial] targetElem is not HTMLElement, default render only support HTMLElement"
-        );
-        return (
-          // <Stack
-          //   pos="absolute"
-          //   minW="256px"
-          //   minH="128px"
-          //   p={4}
-          //   rounded="md"
-          //   bg="gray.600"
-          // >
-          //   EasyTutorial default render only support HTMLElement, You should
-          //   provide a custom render function.
-          // </Stack>
-          <div>Error Render</div>
-        );
-      }
-
-      const maybeDarkMode = (): boolean => {
-        if (typeof args === "undefined") {
-          return false;
-        }
-        const maybeColorMode = args[0];
-        if (typeof maybeColorMode === "string") {
-          return maybeColorMode === "dark";
-        }
-        return false;
-      };
-      const { top: targetTop, left: targetLeft } = getElemAbsPos(targetElem);
-      const targetHeight = targetElem.offsetHeight;
-      const targetWidth = targetElem.offsetWidth;
-
-      const firstBtns = <div>firstBtns Render</div>;
-      const commonBtns = <div>commonBtns Render</div>;
-      const lastBtn = <div>lastBtns Render</div>;
-      const singleBtn = <div>singleBtn Render</div>;
-      const btns = () => {
-        console.log("stepType", stepType);
-        switch (stepType) {
-          case "first":
-            return firstBtns;
-          case "last":
-            return lastBtn;
-          case "single":
-            return singleBtn;
-          default:
-            return commonBtns;
-        }
-      };
-
-      let focusEffectZIndex = Number(targetElem.style.zIndex) - 1;
-      if (isNaN(focusEffectZIndex)) focusEffectZIndex = 0;
-
-      const focusEffectPadding = 12;
-      const space = 8;
-      let top: number | undefined;
-      let left: number | undefined;
-      let transform: string | undefined;
-      switch (placement) {
-        case "top-left":
-          top = targetTop - focusEffectPadding - space;
-          left = targetLeft - focusEffectPadding;
-          transform = "translateY(-100%)";
-          break;
-        case "top-center":
-          top = targetTop - focusEffectPadding - space;
-          left = targetLeft + targetElem.offsetWidth / 2;
-          transform = "translate(-50%, -100%)";
-          break;
-        case "top-right":
-          top = targetTop - focusEffectPadding - space;
-          left = targetLeft + targetElem.offsetWidth + focusEffectPadding;
-          transform = "translate(-100%, -100%)";
-          break;
-        case "left-top":
-          top = targetTop - focusEffectPadding;
-          left = targetLeft - focusEffectPadding - space;
-          transform = "translateX(-100%)";
-          break;
-        case "left-center":
-          top = targetTop + targetHeight / 2;
-          left = targetLeft - focusEffectPadding - space;
-          transform = "translate(-100%, -50%)";
-          break;
-        case "left-bottom":
-          top = targetTop + targetHeight + focusEffectPadding;
-          left = targetLeft - focusEffectPadding - space;
-          transform = "translate(-100%, -100%)";
-          break;
-        case "right-top":
-          top = targetTop - focusEffectPadding;
-          left = targetLeft + targetWidth + focusEffectPadding + space;
-          transform = undefined;
-          break;
-        case "right-center":
-          top = targetTop + targetHeight / 2;
-          left = targetLeft + targetWidth + focusEffectPadding + space;
-          transform = "translateY(-50%)";
-          break;
-        case "right-bottom":
-          top = targetTop + targetHeight + focusEffectPadding;
-          left = targetLeft + targetWidth + focusEffectPadding + space;
-          transform = "translateY(-100%)";
-          break;
-        case "bottom-right":
-          top = targetTop + targetHeight + focusEffectPadding + space;
-          left = targetLeft + targetWidth + focusEffectPadding;
-          transform = "translateX(-100%)";
-          break;
-        case "bottom-center":
-          top = targetTop + targetHeight + focusEffectPadding + space;
-          left = targetLeft + targetWidth / 2;
-          transform = "translateX(-50%)";
-          break;
-        default:
-          // bottom-left
-          top = targetTop + targetHeight + focusEffectPadding + space;
-          left = targetLeft - focusEffectPadding;
-          transform = undefined;
-          break;
-      }
-
-      return (
-        <>
-          {/* <Stack
-            pos="absolute"
-            top={`${top}px`}
-            left={`${left}px`}
-            transform={transform}
-            minW="256px"
-            minH="128px"
-            p={4}
-            rounded="md"
-            bg={maybeDarkMode() ? "gray.600" : "gray.300"}
-            spacing={0}
-          >
-            {content}
-            <Spacer />
-            <Box mt={2}>{btns()}</Box>
-          </Stack>
-
-          <Box
-            zIndex={focusEffectZIndex || "auto"}
-            pos="absolute"
-            top={`${targetTop - focusEffectPadding}px`}
-            left={`${targetLeft - focusEffectPadding}px`}
-            w={`${targetWidth + focusEffectPadding * 2}px`}
-            h={`${targetHeight + focusEffectPadding * 2}px`}
-            border="3px solid"
-            rounded="md"
-            borderColor={"orange.400"}
-            pointerEvents="none"
-          /> */}
-          <div>
-            defaultRender Render
-            <div>
-              top {top}, left {left}, transform {transform}
-            </div>
-            <div>{btns()}</div>
-            <div>maybeDarkMode {maybeDarkMode()}</div>
-          </div>
-        </>
-      );
-    };
-
     this._steps.push({
       targetQuery,
-      render: render ?? defaultRender,
+      content: content ?? <></>,
+      render: render ?? this._defaultRender,
       scrollInView: scrollInView ?? false,
       canRender: canRender ?? (() => true),
       noticeMsg: noticeMsg ?? "You need follow the tutorial.",
@@ -484,7 +557,7 @@ type Placement =
   | "right-top"
   | "right-bottom"
   | "right-center";
-type RenderFuncBasicArg = {
+export type RenderFuncBasicArg = {
   targetElem: Element;
   stepType: StepType;
   next: () => void;
@@ -493,14 +566,16 @@ type RenderFuncBasicArg = {
   placement: Placement;
   totalStep: number;
   currentStep: number;
+  currentContent: JSX.Element;
 };
-type RenderFunc<A extends Array<any>> = (
+export type RenderFunc<A extends Array<any>> = (
   basicArg: RenderFuncBasicArg,
   ...args: A
 ) => JSX.Element;
 
 type TutorialStep<A extends Array<any>> = {
   targetQuery: string;
+  content: JSX.Element;
   render: RenderFunc<A>;
   noticeMsg: string;
   noticeTitle: string;
@@ -512,7 +587,7 @@ type TutorialStep<A extends Array<any>> = {
   canRender: () => boolean;
 };
 type AddStepParams<A extends Array<any>> = Partial<
-  Omit<TutorialStep<A>, "targetQuery">
+  Omit<TutorialStep<A>, "targetQuery" | "content">
 > & {
   targetQuery: string;
   content?: JSX.Element;
@@ -528,6 +603,6 @@ type TutorialEvents = {
   prevStep: void;
   start: void;
   stop: void;
-  canNotNext: EasyTutorialNoticeMeta;
+  canNotRender: EasyTutorialNoticeMeta;
 };
 type TutorialEmitter = Emitter<TutorialEvents>;
