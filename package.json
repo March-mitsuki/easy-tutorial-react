@@ -3,15 +3,23 @@
   "version": "0.3.3",
   "description": "Write onboarding tutorial with a declarative API",
   "keywords": [
-    "react",
+    "reactjs",
+    "ux",
     "tutorial",
     "guide",
-    "step-by-step",
+    "tour",
     "intro",
     "typescript"
   ],
-  "author": "March-Mitsuki",
+  "author": "March-mitsuki",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/March-mitsuki/easy-tutorial-react/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/March-mitsuki/easy-tutorial-react"
+  },
   "dependencies": {
     "@emotion/react": "^11.11.3",
     "@emotion/serialize": "^1.1.3",

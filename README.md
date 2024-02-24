@@ -8,6 +8,18 @@
 6. Completely written in TypeScript
 7. MIT LICENSE
 
+# Installation
+
+```bash
+npm install easy-tutorial-react
+
+# OR
+yarn add easy-tutorial-react
+
+# OR
+pnpm add easy-tutorial-react
+```
+
 # Quick Start
 
 Create a `EasyTutorial` class and pass it as a dataSource to the `EasyTutorialRenderer` and `EasyTutorialNoticeRenderer`.
@@ -56,7 +68,8 @@ export default function App() {
 }
 ```
 
-**notice**
+**Notice**
+
 We won't make any changes to the browser's DOM before you actively render the EasyTutorialRenderer. 
 
 So, We recommend having the EasyTutorialRenderer as one of the first components to render in your React project, such as placing it in `App.tsx` or another initial component where your React app renders.
@@ -79,12 +92,13 @@ myTutorial.addStep({
 })
 ```
 
-**notice**
+**Notice**
+
 Some UI frameworks may change the structure of the DOM tree. ( Such as ChakraUI, which adds some extra nodes to the document when changing color mode. )
 
 This can lead to the same XPath locating diffrent elements.
 
-To solve this problem, we recommend still adding some IDs to your components. This IDs will act similarly to "keyframes" when using XPath to search.
+To solve this problem, we recommend still adding some IDs to your components. This IDs will act as some "anchors", helping XPath to precisely locate your elements.
 
 For example, add a top-level ID to each page component:
 ```tsx
